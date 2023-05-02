@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Azure;
 using CanariaApi.Data;
+using CanariaApi.Migrations;
 using CanariaApi.Models;
 using CanariaApi.Models.DTO;
 using CanariaApi.Repository.Irepository;
@@ -12,27 +13,29 @@ using System.Net;
 
 namespace CanariaApi.Controllers
 {
-    [Route("api/CanariaApi")]
+    [Route("api/CanariaNumberApi")]
     [ApiController]
-    public class CanariaApiController : Controller
+    public class CanariaNumberApiController : Controller
     {
-        private readonly IApartmentRepository _CanariDb;
+        private readonly IApartmentNumberRepository _CanariDb;
+        private readonly IApartmentRepository _ApartmentDb;
         private readonly IMapper _mapper;
         protected ApiResponse _apiResponse;
-        public CanariaApiController(IApartmentRepository context, IMapper mapper)
+        public CanariaNumberApiController(IApartmentNumberRepository context, IApartmentRepository ApartmentDb, IMapper mapper)
         {
             _CanariDb = context;
+            _ApartmentDb = ApartmentDb;
             _mapper = mapper;
             this._apiResponse = new();
         }
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<ApiResponse>> GetApartment()
+        public async Task<ActionResult<ApiResponse>> GetApartmentNumber()
         {
             try
             {
-                IEnumerable<Apartment> apartmentList = await _CanariDb.GetAllAsync();
-                _apiResponse.Result = _mapper.Map<List<ApartmentDto>>(apartmentList);
+                IEnumerable<ApartmentNumber> apartmentNumberList = await _CanariDb.GetAllAsync();
+                _apiResponse.Result = _mapper.Map<List<ApartmentNumberDto>>(apartmentNumberList);
                 _apiResponse.StatusCode = System.Net.HttpStatusCode.OK;
                 return Ok(_apiResponse);
             }
@@ -44,11 +47,11 @@ namespace CanariaApi.Controllers
             }
             return _apiResponse;
         }
-        [HttpGet("{id:int}", Name ="GetApartment")]
+        [HttpGet("{id:int}", Name = "GetApartmentNumber")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse>> GetApartment(int id)
+        public async Task<ActionResult<ApiResponse>> GetApartmentNumber(int id)
         {
             try
             {
@@ -57,13 +60,13 @@ namespace CanariaApi.Controllers
                     _apiResponse.StatusCode=HttpStatusCode.BadRequest;
                     return BadRequest(_apiResponse);
                 }
-                var apartment = await _CanariDb.GetAsync(ap => ap.ApartmentId == id);
-                if (apartment == null)
+                var apartmentNumber = await _CanariDb.GetAsync(ap => ap.ApartmentNo == id);
+                if (apartmentNumber == null)
                 {
                     _apiResponse.StatusCode = HttpStatusCode.NotFound;
                     return BadRequest(_apiResponse);
                 }
-                _apiResponse.Result = _mapper.Map<ApartmentDto>(apartment);
+                _apiResponse.Result = _mapper.Map<ApartmentNumberDto>(apartmentNumber);
                 _apiResponse.StatusCode = HttpStatusCode.OK;
                 return Ok(_apiResponse);
             }
@@ -79,24 +82,29 @@ namespace CanariaApi.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ApiResponse>> CreateApartment([FromBody] ApartmentCreateDto createDto)
+        public async Task<ActionResult<ApiResponse>> CreateApartmentNumber([FromBody] ApartmentNumberCreateDto createDto)
         {
             try
             {
-                if (await _CanariDb.GetAsync(ap => ap.Name.ToLower() == createDto.Name.ToLower()) != null)
+                if (await _CanariDb.GetAsync(ap => ap.ApartmentNo == createDto.ApartmentNo) != null)
                 {
-                    ModelState.AddModelError("Custom error", "This apartment alredy exist");
+                    ModelState.AddModelError("Custom error", "This apartment number alredy exist");
+                    return BadRequest(ModelState);
+                }
+                if (await _ApartmentDb.GetAsync(apdb=>apdb.ApartmentId==createDto.FkApartmentId)==null)
+                {
+                    ModelState.AddModelError("CustomError", "Apartment id is not valid");
                     return BadRequest(ModelState);
                 }
                 if (createDto == null)
                 {
                     return BadRequest(createDto);
                 }
-                Apartment apartment = _mapper.Map<Apartment>(createDto);
-                await _CanariDb.CreateAsync(apartment);
-                _apiResponse.Result = _mapper.Map<ApartmentDto>(apartment);
+                ApartmentNumber apartmentNumber = _mapper.Map<ApartmentNumber>(createDto);
+                await _CanariDb.CreateAsync(apartmentNumber);
+                _apiResponse.Result = _mapper.Map<ApartmentNumberDto>(apartmentNumber);
                 _apiResponse.StatusCode = System.Net.HttpStatusCode.Created;
-                return CreatedAtRoute("GetApartment", new { id = apartment.ApartmentId }, _apiResponse);
+                return CreatedAtRoute("GetApartment", new { id = apartmentNumber.ApartmentNo }, _apiResponse);
             }
             catch (Exception ex)
             {
@@ -106,11 +114,11 @@ namespace CanariaApi.Controllers
             }
             return _apiResponse;
         }
-        [HttpDelete("{id:int}", Name = "DeleteApartment")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [HttpDelete("{id:int}", Name = "DeleteApartmentNumber")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ApiResponse>> DeleteApartment(int id)
+        public async Task<ActionResult<ApiResponse>> DeleteApartmentNumber(int id)
         {
             try
             {
@@ -118,12 +126,12 @@ namespace CanariaApi.Controllers
                 {
                     return BadRequest();
                 }
-                var apartment = await _CanariDb.GetAsync(ap => ap.ApartmentId == id);
-                if (apartment == null)
+                var apartmentNumber = await _CanariDb.GetAsync(ap => ap.ApartmentNo == id);
+                if (apartmentNumber == null)
                 {
                     return NotFound();
                 }
-                await _CanariDb.RemoveAsync(apartment);
+                await _CanariDb.RemoveAsync(apartmentNumber);
                 _apiResponse.StatusCode = System.Net.HttpStatusCode.NoContent;
                 _apiResponse.IsSuccess = true;
                 return Ok(_apiResponse);
@@ -136,19 +144,23 @@ namespace CanariaApi.Controllers
             }
             return _apiResponse;
         }
-        [HttpPut("{id:int}", Name = "UpdateApartment")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [HttpPut("{id:int}", Name = "UpdateApartmentNumber")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ApiResponse>> UpdateApartment(int id, [FromBody] ApartmentUpdateDto updateDto)
+        public async Task<ActionResult<ApiResponse>> UpdateApartmentNumber(int id, [FromBody] ApartmentNumberUpdateDto updateDto)
         {
             try
             {
-                if (updateDto == null || id != updateDto.ApartmentId)
+                if (updateDto == null || id != updateDto.ApartmentNo)
                 {
                     return BadRequest();
                 }
+                if (await _ApartmentDb.GetAsync(apdb => apdb.ApartmentId == updateDto.FkApartmentId) == null)
+                {
+                    ModelState.AddModelError("CustomError", "Apartment id is not valid");
+                }
                 //var apartment = _CanariDb.GetAsync(ap => ap.ApartmentId == id, tracked:false);
-                Apartment model = _mapper.Map<Apartment>(updateDto);
+                ApartmentNumber model = _mapper.Map<ApartmentNumber>(updateDto);
 
                 await _CanariDb.UpdateAsync(model);
                 _apiResponse.StatusCode = HttpStatusCode.NoContent;
@@ -163,30 +175,30 @@ namespace CanariaApi.Controllers
             }
             return _apiResponse;
         }
-        [HttpPatch("{id:int}", Name = "UpdatePartialApartment")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdatePartialApartment(int id, JsonPatchDocument<ApartmentUpdateDto> patchDto)
-        {
-            if (patchDto == null || id == 0)
-            {
-                return BadRequest();
-            }
-            var apartment = await _CanariDb.GetAsync(ap => ap.ApartmentId == id, tracked: false);
-            ApartmentUpdateDto apartmentDto = _mapper.Map<ApartmentUpdateDto>(apartment);
-            if (apartment==null)
-            {
-                return BadRequest();
-            }
-            patchDto.ApplyTo(apartmentDto, ModelState);
-            Apartment model = _mapper.Map<Apartment>(apartmentDto);
+        //[HttpPatch("{id:int}", Name = "UpdatePartialApartment")]
+        //[ProducesResponseType(StatusCodes.Status204NoContent)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //public async Task<IActionResult> UpdatePartialApartment(int id, JsonPatchDocument<ApartmentUpdateDto> patchDto)
+        //{
+        //    if (patchDto == null || id == 0)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    var apartment = await _CanariDb.GetAsync(ap => ap.ApartmentId == id, tracked: false);
+        //    ApartmentUpdateDto apartmentDto = _mapper.Map<ApartmentUpdateDto>(apartment);
+        //    if (apartment==null)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    patchDto.ApplyTo(apartmentDto, ModelState);
+        //    Apartment model = _mapper.Map<Apartment>(apartmentDto);
 
-            await _CanariDb.UpdateAsync(model);
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            return NoContent();
-        }
+        //    await _CanariDb.UpdateAsync(model);
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
+        //    return NoContent();
+        //}
     }
 }

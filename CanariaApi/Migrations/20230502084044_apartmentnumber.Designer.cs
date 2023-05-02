@@ -4,6 +4,7 @@ using CanariaApi.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CanariaApi.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230502084044_apartmentnumber")]
+    partial class apartmentnumber
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,7 +73,7 @@ namespace CanariaApi.Migrations
                         {
                             ApartmentId = 1,
                             Comfort = "",
-                            CreatedDate = new DateTime(2023, 5, 2, 13, 6, 57, 594, DateTimeKind.Local).AddTicks(9078),
+                            CreatedDate = new DateTime(2023, 5, 2, 10, 40, 44, 277, DateTimeKind.Local).AddTicks(1320),
                             Details = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             ImageUrl = "",
                             Kvm = 55,
@@ -83,7 +86,7 @@ namespace CanariaApi.Migrations
                         {
                             ApartmentId = 2,
                             Comfort = "",
-                            CreatedDate = new DateTime(2023, 5, 2, 13, 6, 57, 594, DateTimeKind.Local).AddTicks(9197),
+                            CreatedDate = new DateTime(2023, 5, 2, 10, 40, 44, 277, DateTimeKind.Local).AddTicks(1405),
                             Details = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             ImageUrl = "",
                             Kvm = 55,
@@ -96,7 +99,7 @@ namespace CanariaApi.Migrations
                         {
                             ApartmentId = 3,
                             Comfort = "",
-                            CreatedDate = new DateTime(2023, 5, 2, 13, 6, 57, 594, DateTimeKind.Local).AddTicks(9200),
+                            CreatedDate = new DateTime(2023, 5, 2, 10, 40, 44, 277, DateTimeKind.Local).AddTicks(1408),
                             Details = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             ImageUrl = "",
                             Kvm = 75,
@@ -109,7 +112,7 @@ namespace CanariaApi.Migrations
                         {
                             ApartmentId = 4,
                             Comfort = "",
-                            CreatedDate = new DateTime(2023, 5, 2, 13, 6, 57, 594, DateTimeKind.Local).AddTicks(9203),
+                            CreatedDate = new DateTime(2023, 5, 2, 10, 40, 44, 277, DateTimeKind.Local).AddTicks(1412),
                             Details = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             ImageUrl = "h",
                             Kvm = 90,
@@ -122,7 +125,7 @@ namespace CanariaApi.Migrations
                         {
                             ApartmentId = 5,
                             Comfort = "",
-                            CreatedDate = new DateTime(2023, 5, 2, 13, 6, 57, 594, DateTimeKind.Local).AddTicks(9207),
+                            CreatedDate = new DateTime(2023, 5, 2, 10, 40, 44, 277, DateTimeKind.Local).AddTicks(1415),
                             Details = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
                             ImageUrl = "",
                             Kvm = 110,
@@ -141,9 +144,6 @@ namespace CanariaApi.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("FkApartmentId")
-                        .HasColumnType("int");
-
                     b.Property<string>("SpecialDetails")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -153,20 +153,7 @@ namespace CanariaApi.Migrations
 
                     b.HasKey("ApartmentNo");
 
-                    b.HasIndex("FkApartmentId");
-
                     b.ToTable("ApartmentNumbers");
-                });
-
-            modelBuilder.Entity("CanariaApi.Models.ApartmentNumber", b =>
-                {
-                    b.HasOne("CanariaApi.Models.Apartment", "Apartment")
-                        .WithMany()
-                        .HasForeignKey("FkApartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Apartment");
                 });
 #pragma warning restore 612, 618
         }

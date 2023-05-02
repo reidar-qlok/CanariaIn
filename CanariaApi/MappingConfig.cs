@@ -8,11 +8,14 @@ namespace CanariaApi
     {
         public MappingConfig()
         {
-            CreateMap<Apartment, ApartmentDto>();
-            CreateMap<ApartmentDto, Apartment>();
-
+            CreateMap<Apartment, ApartmentDto>().ReverseMap();
+            //CreateMap<ApartmentDto, Apartment>();
             CreateMap<Apartment, ApartmentCreateDto>().ReverseMap();
-            CreateMap<Apartment, ApartmentUpdateDto>().ReverseMap(); 
+            CreateMap<Apartment, ApartmentUpdateDto>().ReverseMap();
+
+            CreateMap<ApartmentNumber, ApartmentNumberDto>().ReverseMap();
+            CreateMap<ApartmentNumber, ApartmentNumberCreateDto>().ReverseMap();
+            CreateMap<ApartmentNumber, ApartmentNumberUpdateDto>().ReverseMap();
         }
     }
 }

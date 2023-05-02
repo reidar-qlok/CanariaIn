@@ -10,6 +10,7 @@ namespace CanariaApi.Data
             
         }
         public DbSet<Apartment> Apartments { get; set; }
+        public DbSet<ApartmentNumber> ApartmentNumbers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Apartment>().HasData(
