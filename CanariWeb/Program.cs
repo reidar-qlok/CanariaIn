@@ -1,7 +1,15 @@
+using CanariaWeb;
+using CanariWeb.Services;
+using CanariWeb.Services.IServices;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddAutoMapper(typeof(MappingConfig));
+
+builder.Services.AddHttpClient<IApartmentService, ApartmentService>();
+builder.Services.AddScoped<IApartmentService, ApartmentService>();
 
 var app = builder.Build();
 
